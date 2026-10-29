@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joel Biju | Wizarding Odyssey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Lora:ital,wght@0,400;0,600;1,400&family=Marcellus&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <!-- 3D Canvas Canvas Mount -->
+  <div id="webgl-container"></div>
+
+  <!-- Glowing Wand Cursor (Desktop Only) -->
+  <div id="wand-cursor" class="wand-cursor">
+    <div class="wand-core"></div>
+    <div class="wand-flare"></div>
+  </div>
+
+  <!-- Platform 9 3/4 Loading Screen -->
+  <div id="loader" class="loader-overlay">
+    <div class="platform-sign">9¾</div>
+    <h1 class="loader-title">Hogwarts Express Departing</h1>
+    <div class="progress-bar-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+    <div id="progress-text" class="progress-text">0%</div>
+
+    <div id="loader-actions" class="loader-actions hidden">
+      <button id="btn-enter-sound" class="hogwarts-btn primary">Enter with sound</button>
+      <button id="btn-enter-silent" class="hogwarts-btn">Enter without sound</button>
+    </div>
+    <button id="btn-skip-loader" class="skip-link">Skip</button>
+  </div>
+
+  <!-- Overlay UI Controls -->
+  <div id="ui-layer" class="ui-layer">
+    <div class="top-bar">
+      <div class="audio-controls">
+        <button id="audio-toggle" class="icon-btn" aria-label="Toggle Sound">🔊</button>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.7" />
+      </div>
+      <div class="scene-actions">
+        <button id="btn-replay" class="ghost-btn">Replay</button>
+        <button id="btn-skip-intro" class="ghost-btn">Skip Intro</button>
+      </div>
+    </div>
+
+    <!-- Subtitle and Callout Prompt -->
+    <div class="text-stage">
+      <div id="role-subtitle" class="role-subtitle"></div>
+      <div id="scroll-hint" class="scroll-hint">
+        <span class="hint-text"></span>
+        <div class="scroll-orb"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
