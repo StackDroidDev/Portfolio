@@ -191,7 +191,7 @@ export class Part1Hall {
         const wandMat = new THREE.MeshStandardMaterial({
             color: 0x24140b,
             roughness: 0.6,
-            metalness: 0.1
+            metalness: 0.5                              // 0.1
         });
 
         const shaft = new THREE.Mesh(
@@ -214,7 +214,7 @@ export class Part1Hall {
         this.wandTipLight.position.copy(tipMesh.position);
         this.wandGroup.add(this.wandTipLight);
 
-        this.wandGroup.position.set(0, 0, -2);
+        this.wandGroup.position.set(0.1, 0, 0.4); // 0.1, 0.4
         this.wandGroup.scale.set(0.001, 0.001, 0.001);
         this.scene.add(this.wandGroup);
     }
@@ -236,7 +236,7 @@ export class Part1Hall {
             depthWrite: false
         });
 
-        this.canvasPlane = new THREE.Mesh(new THREE.PlaneGeometry(8, 4), planeMat);
+        this.canvasPlane = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), planeMat);
         this.canvasPlane.position.set(0, 0, 0);
         this.scene.add(this.canvasPlane);
     }
@@ -293,7 +293,7 @@ export class Part1Hall {
         this.flashLight.position.set(0, 0, 1);
         this.scene.add(this.flashLight);
         // Parameters: (color, intensity, distance, decay)
-this.cursorLight = new THREE.PointLight(0xfffae0, 8.5, 6.0, 1.2);
+        this.cursorLight = new THREE.PointLight(0xfffae0, 8.5, 6.0, 1.2);
         this.cursorLight.position.set(0, 0, 0.55); // Sits right in front of the text plane
         this.scene.add(this.cursorLight);
     }
@@ -344,16 +344,21 @@ this.cursorLight = new THREE.PointLight(0xfffae0, 8.5, 6.0, 1.2);
             ease: 'power1.out'
         }, 0);
 
-        // 2-3s: Wand appears & tip ignites
+        // Ensure the wand is already positioned at the start of the first letter
+        const startX = -4.25;
+        this.wandGroup.position.set(startX, 0.1, 0.4);
+
+        // 2-3s: Wand emerges gently right at the starting letter and ignites
         tl.to(this.wandGroup.scale, {
             x: 1, y: 1, z: 1,
-            duration: 0.8,
-            ease: 'back.out(1.5)'
+            duration: 1.0,
+            ease: 'power2.out'
         }, 2.0);
 
         tl.to(this.wandTipLight, {
-            intensity: 2.5,
-            duration: 0.6
+            intensity: 4.8,
+            duration: 0.8,
+            ease: 'power2.out'
         }, 2.2);
 
         // 3-7s: The Wand writes "Joel Biju" stroke by stroke
@@ -370,8 +375,8 @@ this.cursorLight = new THREE.PointLight(0xfffae0, 8.5, 6.0, 1.2);
 
         // 7-8s: Flash burst & permanent lock of solid golden letters
         tl.to(this.flashLight, {
-            intensity: 7.0,
-            duration: 0.15,
+            intensity: 9.0,
+            duration: 0.25,
             ease: 'power2.in',
             onStart: () => this.audio.playTransformationChime()
         }, 7.0);
@@ -429,17 +434,25 @@ this.cursorLight = new THREE.PointLight(0xfffae0, 8.5, 6.0, 1.2);
         const ctx = this.drawCtx;
         ctx.clearRect(0, 0, 2048, 1024);
 
-        // Fluid cursive stroke interpolation
-        ctx.font = "italic bold 125px 'Cinzel Decorative', cursive, serif";
+        // 1. Larger font size matching the 3D name
+        ctx.font = "italic bold 165px 'Cinzel Decorative', cursive, serif";
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
+        // 2. Extra tracking / character spacing
+        if ('letterSpacing' in ctx) {
+            ctx.letterSpacing = '10px';
+        }
+
         const fullText = content.name;
         const charCount = Math.floor(progress * fullText.length);
-        const partialText = fullText.slice(0, charCount);
 
+        // Spread letters with spacing so characters never feel cramped
+        const partialText = fullText.slice(0, charCount).split('').join(' ');
+
+        // Fiery golden glow & stroke thickness
         ctx.shadowColor = '#e8b04a';
-        ctx.shadowBlur = 25;
+        ctx.shadowBlur = 30;
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 6;
         ctx.strokeText(partialText, 1024, 512);
@@ -449,13 +462,13 @@ this.cursorLight = new THREE.PointLight(0xfffae0, 8.5, 6.0, 1.2);
 
         this.canvasTexture.needsUpdate = true;
 
-        // Move wand tip along text coordinate path
-        const textWidth = 6.0;
+        // 3. Widened wand tip travel span to match the larger text footprint
+        const textWidth = 4.5;
         const startX = -textWidth / 2;
         const currentX = startX + textWidth * progress;
-        const currentY = Math.sin(progress * Math.PI * 4) * 0.25;
+        const currentY = Math.sin(progress * Math.PI * 4) * 0.35;
 
-        this.wandGroup.position.set(currentX + 0.6, currentY - 0.4, 0.4);
+        this.wandGroup.position.set(currentX + 0.5, currentY - 0.25, 0.2);
     }
 
     skipToEnd() {
