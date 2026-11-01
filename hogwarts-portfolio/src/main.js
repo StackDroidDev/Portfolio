@@ -64,13 +64,28 @@ class App {
     this.greatHallScene = new GreatHallScene(this.scene, this.houseTheme);
 
     this.scrollManager.onRoomChange((roomIndex) => {
-      if (roomIndex === 1) {
+      const p1Role = document.getElementById('role-subtitle');
+      const p1Hint = document.getElementById('scroll-hint');
+
+      if (roomIndex === 0) {
+        // In Room 1 (Name Reveal)
+        if (this.hallScene.solidTextGroup) this.hallScene.solidTextGroup.material.opacity = 1;
+        if (p1Role) p1Role.style.display = 'block';
+        if (p1Hint) p1Hint.style.display = 'flex';
+        document.getElementById('sorting-hat-ui')?.classList.add('hidden');
+        this.greatHallScene.onLeaveRoom();
+      } else if (roomIndex === 1) {
+        // In Room 2 (Sorting Hat)
+        if (this.hallScene.solidTextGroup) this.hallScene.solidTextGroup.material.opacity = 0;
+        if (p1Role) p1Role.style.display = 'none';
+        if (p1Hint) p1Hint.style.display = 'none';
         this.sortingHatScene.onEnterRoom();
         this.greatHallScene.onLeaveRoom();
       } else if (roomIndex === 2) {
+        // In Room 3 (Great Hall)
+        if (this.hallScene.solidTextGroup) this.hallScene.solidTextGroup.material.opacity = 0;
+        document.getElementById('sorting-hat-ui')?.classList.add('hidden');
         this.greatHallScene.onEnterRoom();
-      } else {
-        this.greatHallScene.onLeaveRoom();
       }
     });
   }
@@ -147,4 +162,4 @@ class App {
   }
 }
 
-new App(); q
+new App(); 

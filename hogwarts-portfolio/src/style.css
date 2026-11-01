@@ -5,6 +5,11 @@
   --parchment: #f3e9d2;
   --font-cinzel: 'Cinzel', serif;
   --font-lora: 'Lora', serif;
+
+  /* Dynamic Theme Default Variables */
+  --accent-glow: rgba(232, 176, 74, 0.45);
+  --accent-gold: #e8b04a;
+  --crest-color: #e8b04a;
 }
 
 * {
@@ -12,6 +17,7 @@
   margin: 0;
   padding: 0;
   user-select: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 body, html {
@@ -29,7 +35,9 @@ body, html {
   z-index: 1;
 }
 
-/* Wand Cursor & Spark Trail */
+/* =========================================
+   WAND CURSOR & SPARK TRAILS (Desktop Only)
+   ========================================= */
 .wand-cursor {
   position: fixed;
   top: 0;
@@ -52,6 +60,7 @@ body, html {
   background: #fffdf5;
   border-radius: 50%;
   box-shadow: 0 0 10px 4px var(--candle-gold), 0 0 25px 8px #ff7700;
+  transition: box-shadow 0.4s ease;
 }
 
 .spark-dot {
@@ -63,7 +72,9 @@ body, html {
   z-index: 9998;
 }
 
-/* Platform 9 3/4 Loader */
+/* =========================================
+   PLATFORM 9 3/4 LOADER OVERLAY
+   ========================================= */
 .loader-overlay {
   position: fixed;
   inset: 0;
@@ -137,16 +148,19 @@ body, html {
   margin-top: 28px;
 }
 
-.loader-actions.hidden { display: none; }
+.loader-actions.hidden { display: none !important; }
 
+/* =========================================
+   SHARED BUTTONS & CONTROLS
+   ========================================= */
 .hogwarts-btn {
-  padding: 12px 32px;
-  background: rgba(15, 23, 42, 0.8);
+  padding: 12px 30px;
+  background: rgba(15, 23, 42, 0.85);
   border: 1px solid var(--candle-gold);
   color: var(--parchment);
   font-family: var(--font-cinzel);
   font-size: 14px;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.3s ease;
@@ -154,7 +168,7 @@ body, html {
 
 .hogwarts-btn.primary {
   background: linear-gradient(135deg, rgba(232, 176, 74, 0.25), rgba(184, 134, 40, 0.1));
-  box-shadow: 0 0 20px rgba(232, 176, 74, 0.2);
+  box-shadow: 0 0 20px rgba(232, 176, 74, 0.25);
 }
 
 .hogwarts-btn:hover {
@@ -164,19 +178,44 @@ body, html {
   box-shadow: 0 0 25px rgba(232, 176, 74, 0.6);
 }
 
+.ghost-btn {
+  background: rgba(7, 11, 26, 0.7);
+  border: 1px solid rgba(232, 176, 74, 0.3);
+  color: var(--parchment);
+  cursor: pointer;
+  font-family: var(--font-cinzel);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  padding: 7px 15px;
+  border-radius: 4px;
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+}
+
+.ghost-btn:hover {
+  border-color: var(--candle-gold);
+  color: var(--candle-gold);
+}
+
 .skip-link {
-  position: absolute;
-  bottom: 32px;
   background: transparent;
   border: none;
-  color: rgba(243, 233, 210, 0.4);
+  color: rgba(243, 233, 210, 0.5);
   font-family: var(--font-lora);
+  font-size: 13px;
   letter-spacing: 1px;
   cursor: pointer;
   text-decoration: underline;
+  transition: color 0.2s;
 }
 
-/* UI Overlay Layer */
+.skip-link:hover {
+  color: var(--candle-gold);
+}
+
+/* =========================================
+   ROOM 1 UI OVERLAYS (Name Reveal Stage)
+   ========================================= */
 .ui-layer {
   position: fixed;
   inset: 0;
@@ -193,26 +232,6 @@ body, html {
   justify-content: space-between;
   align-items: center;
   pointer-events: auto;
-}
-
-.ghost-btn {
-  background: rgba(7, 11, 26, 0.65);
-  border: 1px solid rgba(232, 176, 74, 0.3);
-  color: var(--parchment);
-  cursor: pointer;
-  font-family: var(--font-cinzel);
-  font-size: 13px;
-  letter-spacing: 1px;
-  padding: 8px 16px;
-  border-radius: 4px;
-  margin-left: 8px;
-  backdrop-filter: blur(4px);
-  transition: all 0.3s ease;
-}
-
-.ghost-btn:hover {
-  border-color: var(--candle-gold);
-  color: var(--candle-gold);
 }
 
 .text-stage {
@@ -263,65 +282,74 @@ body, html {
   50% { transform: translateY(8px); opacity: 1; }
 }
 
-/* --- PART 2 STYLES: SORTING HAT, CRESTS & GREAT HALL --- */
-
-/* Sorting Hat Speech Bubble */
+/* =========================================
+   ROOM 2 UI OVERLAYS (Sorting Hat Stage)
+   ========================================= */
 .sorting-ui-container {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 20;
+  z-index: 50;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 70px;
-  transition: opacity 0.5s ease;
+  justify-content: center;
+  padding: 24px;
+  transition: opacity 0.4s ease;
 }
 
 .sorting-ui-container.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  display: none !important;
 }
 
+/* Speech Bubble */
 .hat-speech-bubble {
-  background: rgba(7, 11, 26, 0.85);
+  background: rgba(8, 12, 26, 0.92);
   border: 1px solid var(--candle-gold);
   border-radius: 8px;
-  padding: 16px 28px;
-  max-width: min(580px, 86vw);
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(232, 176, 74, 0.25);
-  backdrop-filter: blur(8px);
-  margin-bottom: 24px;
+  padding: 18px 32px;
+  max-width: min(540px, 88vw);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  margin-bottom: 22px;
   pointer-events: auto;
   text-align: center;
 }
 
 .speech-text {
   font-family: var(--font-cinzel);
-  font-size: clamp(15px, 2.2vw, 19px);
+  font-size: clamp(16px, 2.2vw, 20px);
   letter-spacing: 2px;
   color: var(--parchment);
   line-height: 1.5;
-  min-height: 28px;
 }
 
 .sorting-actions-row {
   display: flex;
   gap: 16px;
   pointer-events: auto;
+  margin-bottom: 12px;
 }
 
-/* Quiz Card */
+/* Strict single-stage hidden states */
+.sorting-actions-row.hidden,
+.sorting-quiz-card.hidden,
+.crests-grid.hidden,
+.sorting-result-banner.hidden,
+.change-house-widget.hidden,
+.hat-speech-bubble.hidden {
+  display: none !important;
+}
+
+/* Quiz Card Modal */
 .sorting-quiz-card {
-  background: rgba(9, 14, 32, 0.9);
+  background: rgba(9, 13, 28, 0.96);
   border: 1px solid var(--candle-gold);
   border-radius: 8px;
-  padding: 24px 32px;
-  width: min(520px, 90vw);
-  box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(10px);
+  padding: 28px 36px;
+  width: min(520px, 92vw);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(14px);
   pointer-events: auto;
   display: flex;
   flex-direction: column;
@@ -330,32 +358,40 @@ body, html {
 
 .quiz-question {
   font-family: var(--font-cinzel);
-  font-size: 17px;
+  font-size: 16px;
   color: var(--candle-gold);
   text-align: center;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  line-height: 1.4;
 }
 
 .quiz-options {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .quiz-opt-btn {
-  text-align: left;
-  padding: 10px 18px;
-  font-size: 13px;
-  text-transform: none;
+  text-align: center;
+  padding: 12px 20px;
+  font-size: 14px;
   font-family: var(--font-lora);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(243, 233, 210, 0.25);
 }
 
-/* 4 House Crests Grid */
+.quiz-opt-btn:hover {
+  background: var(--candle-gold);
+  color: #070b1a;
+  border-color: var(--candle-gold);
+}
+
+/* 4 House Crests Selection Grid */
 .crests-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  width: min(720px, 94vw);
+  gap: 16px;
+  width: min(720px, 92vw);
   pointer-events: auto;
 }
 
@@ -366,109 +402,119 @@ body, html {
 }
 
 .crest-card {
-  background: rgba(11, 16, 36, 0.78);
-  border: 1px solid rgba(243, 233, 210, 0.2);
-  border-radius: 6px;
-  padding: 16px 12px;
+  background: rgba(10, 14, 30, 0.88);
+  border: 1px solid rgba(243, 233, 210, 0.25);
+  border-radius: 8px;
+  padding: 20px 14px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(6px);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(8px);
 }
 
 .crest-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   border-color: var(--crest-accent);
-  box-shadow: 0 0 20px var(--crest-accent);
+  box-shadow: 0 0 25px var(--crest-accent);
 }
 
 .crest-symbol {
   font-family: var(--font-cinzel);
-  font-size: 24px;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--crest-accent);
+  letter-spacing: 2px;
 }
 
 .crest-name {
   font-family: var(--font-cinzel);
-  font-size: 14px;
-  letter-spacing: 1.5px;
+  font-size: 15px;
+  letter-spacing: 2px;
   color: var(--parchment);
-  margin: 6px 0 2px 0;
+  margin: 8px 0 4px 0;
 }
 
 .crest-sub {
   font-size: 11px;
-  color: rgba(243, 233, 210, 0.6);
+  color: rgba(243, 233, 210, 0.55);
 }
 
-/* Sorting Result Banner */
+/* Sorting Ceremony Result Banner */
 .sorting-result-banner {
   text-align: center;
   pointer-events: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .result-badge {
   font-family: var(--font-cinzel);
-  font-size: 12px;
-  letter-spacing: 4px;
+  font-size: 13px;
+  letter-spacing: 5px;
   color: rgba(243, 233, 210, 0.7);
-  text-transform: uppercase;
 }
 
 .result-house-title {
   font-family: var(--font-cinzel);
-  font-size: clamp(32px, 5vw, 56px);
-  letter-spacing: 6px;
-  text-shadow: 0 0 25px currentColor;
+  font-size: clamp(38px, 6vw, 64px);
+  letter-spacing: 8px;
+  text-shadow: 0 0 35px currentColor;
+  margin-bottom: 8px;
 }
 
-/* Change House Tag & Widget */
+/* Returning Visitor Change House Badge */
 .change-house-widget {
-  position: absolute;
-  top: 30px;
-  right: 32px;
+  position: fixed;
+  top: 24px;
+  right: 28px;
   display: flex;
   align-items: center;
   gap: 12px;
   pointer-events: auto;
+  z-index: 60;
+  background: rgba(7, 11, 26, 0.75);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(232, 176, 74, 0.3);
 }
 
 .house-tag {
   font-family: var(--font-cinzel);
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 2px;
   color: var(--candle-gold);
 }
 
-.sorting-skip {
-  bottom: 20px;
+.sorting-footer-actions {
+  position: absolute;
+  bottom: 24px;
+  pointer-events: auto;
 }
 
-/* Screen Flash overlay for sorting ceremony */
+/* Ceremony Flash Effect */
 .sorting-screen-flash {
   position: fixed;
   inset: 0;
   z-index: 999;
   pointer-events: none;
-  opacity: 0.7;
-  animation: flash-fade 0.7s forwards ease-out;
+  animation: flash-fade 0.6s forwards ease-out;
 }
 
 @keyframes flash-fade {
-  0% { opacity: 0.7; }
+  0% { opacity: 0.6; }
   100% { opacity: 0; }
 }
 
-/* Great Hall Intro Banner */
+/* =========================================
+   ROOM 3 UI OVERLAYS (Great Hall Stage)
+   ========================================= */
 .great-hall-ui {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 15;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -479,8 +525,7 @@ body, html {
 }
 
 .great-hall-ui.hidden {
-  opacity: 0;
-  visibility: hidden;
+  display: none !important;
 }
 
 .great-hall-banner {

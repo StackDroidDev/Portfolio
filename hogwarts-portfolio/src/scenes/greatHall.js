@@ -7,15 +7,17 @@ export class GreatHallScene {
     this.houseTheme = houseThemeManager;
 
     this.group = new THREE.Group();
-    this.group.position.set(0, 0, -95); // Waypoint 2
+    // Placed at -115 so it never overlaps or leaks into Room 2
+    this.group.position.set(0, 0, -115);
     this.scene.add(this.group);
 
+    this.candleCount = 180;
     this.candlesInstanced = null;
-    this.candleCount = 380;
     this.candleData = [];
+    this.flamePoints = null;
     this.starSkyMesh = null;
-    this.windowLightBeams = [];
     this.themeParticles = null;
+    this.hallLight = null;
 
     this.init();
     this.initUI();
@@ -24,64 +26,116 @@ export class GreatHallScene {
 
   init() {
     this.buildHallArchitecture();
-    this.buildInstancedCandles();
-    this.buildEnchantedStarCeiling();
+    this.buildRealisticEnchantedCeiling();
+    this.buildCandlesWithFlames();
     this.buildTrestleTables();
-    this.buildWindowLightShafts();
     this.buildHouseThemeParticles();
   }
 
   buildHallArchitecture() {
-    const wallMat = new THREE.MeshStandardMaterial({
-      color: 0x121727,
+    const stoneMat = new THREE.MeshStandardMaterial({
+      color: 0x141824,
       roughness: 0.88,
       metalness: 0.1
     });
 
     // Main Great Hall Floor
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(28, 60), wallMat);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(32, 80), stoneMat);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -2.5;
+    floor.position.y = -3.2;
     floor.receiveShadow = true;
     this.group.add(floor);
 
-    // Arched side stone columns
-    const colGeo = new THREE.CylinderGeometry(0.7, 0.85, 14, 16);
-    for (let z = -25; z <= 25; z += 10) {
-      const colL = new THREE.Mesh(colGeo, wallMat);
-      colL.position.set(-9.5, 4.5, z);
+    // Stone Pillars & High Arched Ribs
+    const archMat = new THREE.MeshStandardMaterial({
+      color: 0x1c2133,
+      roughness: 0.82,
+      metalness: 0.12
+    });
+
+    const colGeo = new THREE.CylinderGeometry(0.55, 0.75, 16, 16);
+    const archGeo = new THREE.TorusGeometry(8.5, 0.35, 12, 24, Math.PI);
+
+    for (let z = -32; z <= 32; z += 16) {
+      const colL = new THREE.Mesh(colGeo, stoneMat);
+      colL.position.set(-9.2, 4.8, z);
       this.group.add(colL);
 
-      const colR = new THREE.Mesh(colGeo, wallMat);
-      colR.position.set(9.5, 4.5, z);
+      const colR = new THREE.Mesh(colGeo, stoneMat);
+      colR.position.set(9.2, 4.8, z);
       this.group.add(colR);
+
+      const arch = new THREE.Mesh(archGeo, archMat);
+      arch.position.set(0, 8.8, z);
+      arch.rotation.z = Math.PI;
+      this.group.add(arch);
     }
+
+    // Warm Hall Center Light
+    this.hallLight = new THREE.PointLight(0xe8b04a, 2.5, 30, 1.2);
+    this.hallLight.position.set(0, 4.5, 0);
+    this.group.add(this.hallLight);
   }
 
-  buildInstancedCandles() {
-    // InstancedMesh for cheap, efficient 400+ floating candles
-    const candleGeo = new THREE.CylinderGeometry(0.045, 0.045, 0.65, 8);
+  buildRealisticEnchantedCeiling() {
+    // High cosmic dome with smooth stars
+    const starCount = 600;
+    const geo = new THREE.BufferGeometry();
+    const positions = new Float32Array(starCount * 3);
+    const opacities = new Float32Array(starCount);
+
+    for (let i = 0; i < starCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 26;
+      positions[i * 3 + 1] = 10.5 + Math.random() * 3.5;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 75;
+      opacities[i] = Math.random();
+    }
+
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const starMat = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.08,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+
+    this.starSkyMesh = new THREE.Points(geo, starMat);
+    this.group.add(this.starSkyMesh);
+  }
+
+  buildCandlesWithFlames() {
+    // 1. Taper Candle Wax Body
+    const candleGeo = new THREE.CylinderGeometry(0.04, 0.048, 0.75, 10);
     const candleMat = new THREE.MeshStandardMaterial({
-      color: 0xf5ecd7,
-      roughness: 0.4,
-      emissive: 0xffd98c,
-      emissiveIntensity: 0.5
+      color: 0xf3e9d2,
+      roughness: 0.45,
+      metalness: 0.05
     });
 
     this.candlesInstanced = new THREE.InstancedMesh(candleGeo, candleMat, this.candleCount);
     this.candlesInstanced.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
+    // 2. Candle Flame Tips
+    const flameGeo = new THREE.BufferGeometry();
+    const flamePos = new Float32Array(this.candleCount * 3);
+
     const dummy = new THREE.Object3D();
     this.candleData = [];
 
     for (let i = 0; i < this.candleCount; i++) {
-      const x = (Math.random() - 0.5) * 16;
-      const y = 3.2 + Math.random() * 5.5;
-      const z = -28 + Math.random() * 52;
+      const x = (Math.random() - 0.5) * 15;
+      const y = 3.2 + Math.random() * 4.2;
+      const z = -32 + Math.random() * 64;
 
       dummy.position.set(x, y, z);
       dummy.updateMatrix();
       this.candlesInstanced.setMatrixAt(i, dummy.matrix);
+
+      flamePos[i * 3] = x;
+      flamePos[i * 3 + 1] = y + 0.42;
+      flamePos[i * 3 + 2] = z;
 
       this.candleData.push({
         baseX: x,
@@ -94,120 +148,53 @@ export class GreatHallScene {
 
     this.candlesInstanced.instanceMatrix.needsUpdate = true;
     this.group.add(this.candlesInstanced);
-  }
 
-  buildEnchantedStarCeiling() {
-    // Custom star sky shader dome simulating Hogwarts enchanted ceiling
-    const skyGeo = new THREE.SphereGeometry(22, 24, 24, 0, Math.PI * 2, 0, Math.PI / 2);
-    const skyMat = new THREE.ShaderMaterial({
-      side: THREE.BackSide,
-      uniforms: {
-        uTime: { value: 0 }
-      },
-      vertexShader: `
-        varying vec3 vWorldPosition;
-        void main() {
-          vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-          vWorldPosition = worldPosition.xyz;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform float uTime;
-        varying vec3 vWorldPosition;
-
-        float rand(vec2 co){
-          return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-        }
-
-        void main() {
-          vec3 dir = normalize(vWorldPosition);
-          // Dark twilight blue gradient
-          vec3 skyColor = mix(vec3(0.02, 0.04, 0.1), vec3(0.005, 0.01, 0.03), clamp(dir.y, 0.0, 1.0));
-
-          // Star dots with twinkling
-          vec2 grid = floor(vWorldPosition.xz * 4.5);
-          float n = rand(grid);
-          if (n > 0.94) {
-            float twinkle = sin(uTime * 4.0 + n * 20.0) * 0.5 + 0.5;
-            skyColor += vec3(0.9, 0.95, 1.0) * twinkle * 1.2;
-          }
-
-          gl_FragColor = vec4(skyColor, 1.0);
-        }
-      `
+    flameGeo.setAttribute('position', new THREE.BufferAttribute(flamePos, 3));
+    const flameMat = new THREE.PointsMaterial({
+      color: 0xffdf78,
+      size: 0.14,
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending
     });
 
-    this.starSkyMesh = new THREE.Mesh(skyGeo, skyMat);
-    this.starSkyMesh.position.set(0, 4.0, 0);
-    this.group.add(this.starSkyMesh);
+    this.flamePoints = new THREE.Points(flameGeo, flameMat);
+    this.group.add(this.flamePoints);
   }
 
   buildTrestleTables() {
-    const tableMat = new THREE.MeshStandardMaterial({
-      color: 0x22170f,
-      roughness: 0.75,
-      metalness: 0.15
+    const woodMat = new THREE.MeshStandardMaterial({
+      color: 0x24180f,
+      roughness: 0.8,
+      metalness: 0.1
     });
 
-    const xSlots = [-6.2, -2.1, 2.1, 6.2]; // 4 Long House Tables
+    const xSlots = [-5.8, -1.9, 1.9, 5.8];
     xSlots.forEach(x => {
-      const top = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.15, 48), tableMat);
-      top.position.set(x, -1.8, 0);
+      const top = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.16, 56), woodMat);
+      top.position.set(x, -2.4, 0);
       top.receiveShadow = true;
       this.group.add(top);
-
-      // Simple benches
-      const benchL = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.1, 48), tableMat);
-      benchL.position.set(x - 1.1, -2.1, 0);
-      this.group.add(benchL);
-
-      const benchR = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.1, 48), tableMat);
-      benchR.position.set(x + 1.1, -2.1, 0);
-      this.group.add(benchR);
-    });
-  }
-
-  buildWindowLightShafts() {
-    // Volumetric moon light shafts angling from the high arched windows
-    const shaftGeo = new THREE.CylinderGeometry(1.2, 3.5, 18, 16, 1, true);
-    const shaftMat = new THREE.MeshBasicMaterial({
-      color: 0x6e9ecf,
-      transparent: true,
-      opacity: 0.07,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-
-    [-15, 0, 15].forEach(z => {
-      const shaft = new THREE.Mesh(shaftGeo, shaftMat);
-      shaft.position.set(-8.8, 5.5, z);
-      shaft.rotation.z = -Math.PI / 4.5;
-      this.group.add(shaft);
-      this.windowLightBeams.push(shaft);
     });
   }
 
   buildHouseThemeParticles() {
-    // Ambient floating magic tailored to active house
     const count = 300;
     const geo = new THREE.BufferGeometry();
     const pos = new Float32Array(count * 3);
 
     for (let i = 0; i < count * 3; i += 3) {
-      pos[i] = (Math.random() - 0.5) * 18;
-      pos[i + 1] = -1.5 + Math.random() * 8.0;
-      pos[i + 2] = -25 + Math.random() * 50;
+      pos[i] = (Math.random() - 0.5) * 16;
+      pos[i + 1] = -1.0 + Math.random() * 8.0;
+      pos[i + 2] = -30 + Math.random() * 60;
     }
 
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-
     const mat = new THREE.PointsMaterial({
       color: 0xe8b04a,
-      size: 0.08,
+      size: 0.07,
       transparent: true,
-      opacity: 0.65,
+      opacity: 0.6,
       blending: THREE.AdditiveBlending
     });
 
@@ -221,12 +208,19 @@ export class GreatHallScene {
       if (this.themeParticles) {
         this.themeParticles.material.color.setHex(data.particleColor);
       }
+      if (this.hallLight) {
+        this.hallLight.color.set(data.glow);
+      }
     });
   }
 
   initUI() {
-    const el = document.createElement('div');
-    el.id = 'great-hall-ui';
+    let el = document.getElementById('great-hall-ui');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'great-hall-ui';
+      document.body.appendChild(el);
+    }
     el.className = 'great-hall-ui hidden';
     el.innerHTML = `
       <div class="great-hall-banner">
@@ -235,7 +229,6 @@ export class GreatHallScene {
         <span class="hall-subhint">${content.greatHall.scrollContinue}</span>
       </div>
     `;
-    document.body.appendChild(el);
   }
 
   onEnterRoom() {
@@ -249,26 +242,27 @@ export class GreatHallScene {
   }
 
   update(time, mouseParallax) {
-    if (this.starSkyMesh) {
-      this.starSkyMesh.material.uniforms.uTime.value = time;
-    }
-
-    // Instanced candle flicker and parallax floating
-    if (this.candlesInstanced) {
+    if (this.candlesInstanced && this.flamePoints) {
       const dummy = new THREE.Object3D();
       const pX = mouseParallax ? mouseParallax.x * 0.4 : 0;
       const pY = mouseParallax ? mouseParallax.y * 0.25 : 0;
+      const fPos = this.flamePoints.geometry.attributes.position.array;
 
       for (let i = 0; i < this.candleCount; i++) {
         const d = this.candleData[i];
-        const floatY = d.baseY + Math.sin(time * d.speed + d.phase) * 0.12 + pY;
-        const floatX = d.baseX + pX;
+        const floatY = d.baseY + Math.sin(time * d.speed + d.phase) * 0.14 + pY;
+        const posX = d.baseX + pX;
 
-        dummy.position.set(floatX, floatY, d.baseZ);
+        dummy.position.set(posX, floatY, d.baseZ);
         dummy.updateMatrix();
         this.candlesInstanced.setMatrixAt(i, dummy.matrix);
+
+        fPos[i * 3] = posX;
+        fPos[i * 3 + 1] = floatY + 0.42;
+        fPos[i * 3 + 2] = d.baseZ;
       }
       this.candlesInstanced.instanceMatrix.needsUpdate = true;
+      this.flamePoints.geometry.attributes.position.needsUpdate = true;
     }
 
     if (this.themeParticles) {

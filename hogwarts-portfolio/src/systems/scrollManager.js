@@ -15,10 +15,13 @@ export class ScrollManager {
     // Room 0: Name Hall (0, 0, 7.5) -> (0, 0, 0)
     // Room 1: Sorting Hat Room (0, 0, -28) -> (0, 0.4, -35)
     // Room 2: The Great Hall (0, 2.8, -75) -> (0, 2.5, -95)
-    this.waypoints = [
+  this.waypoints = [
+      // Room 0: Name Hall
       { cam: new THREE.Vector3(0, 0, 7.5), look: new THREE.Vector3(0, 0, 0) },
-      { cam: new THREE.Vector3(0, 0.35, -28.5), look: new THREE.Vector3(0, 0.35, -34.5) },
-      { cam: new THREE.Vector3(0, 2.8, -75.0), look: new THREE.Vector3(0, 2.4, -100.0) }
+      // Room 1: Sorting Hat Room (Camera sits right in front of the hat at Z = -28)
+      { cam: new THREE.Vector3(0, 0.35, -28.0), look: new THREE.Vector3(0, 0.45, -32.0) },
+      // Room 2: The Great Hall (Camera enters grand hall at Z = -95, looks to -125)
+      { cam: new THREE.Vector3(0, 2.5, -95.0), look: new THREE.Vector3(0, 2.2, -125.0) }
     ];
 
     this.onRoomChangeCallbacks = [];
