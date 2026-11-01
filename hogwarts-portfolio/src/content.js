@@ -9,8 +9,7 @@ export const content = {
   navigationHint: "Scroll to meet the Sorting Hat",
   loading: {
     platform: "Platform 9¾",
-    soundPromptWith: "Enter with sound",
-    soundPromptWithout: "Enter without sound",
+    enter: "Enter",
     skip: "Skip"
   }
 };

@@ -140,13 +140,13 @@ body, html {
 .loader-actions.hidden { display: none; }
 
 .hogwarts-btn {
-  padding: 12px 26px;
+  padding: 12px 32px;
   background: rgba(15, 23, 42, 0.8);
   border: 1px solid var(--candle-gold);
   color: var(--parchment);
   font-family: var(--font-cinzel);
   font-size: 14px;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.3s ease;
@@ -195,45 +195,24 @@ body, html {
   pointer-events: auto;
 }
 
-.audio-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.ghost-btn {
   background: rgba(7, 11, 26, 0.65);
-  padding: 8px 16px;
-  border-radius: 30px;
   border: 1px solid rgba(232, 176, 74, 0.3);
-  backdrop-filter: blur(8px);
-}
-
-.icon-btn, .ghost-btn {
-  background: transparent;
-  border: none;
   color: var(--parchment);
   cursor: pointer;
   font-family: var(--font-cinzel);
   font-size: 13px;
   letter-spacing: 1px;
-  transition: opacity 0.2s;
-}
-
-.ghost-btn {
-  padding: 6px 14px;
-  border: 1px solid rgba(243, 233, 210, 0.2);
+  padding: 8px 16px;
   border-radius: 4px;
   margin-left: 8px;
   backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
 }
 
 .ghost-btn:hover {
   border-color: var(--candle-gold);
   color: var(--candle-gold);
-}
-
-#volume-slider {
-  width: 70px;
-  accent-color: var(--candle-gold);
-  cursor: pointer;
 }
 
 .text-stage {
