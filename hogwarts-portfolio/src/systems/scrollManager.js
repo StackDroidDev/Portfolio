@@ -4,25 +4,25 @@ import gsap from 'gsap';
 export class ScrollManager {
   constructor(camera) {
     this.camera = camera;
-    this.scrollProgress = 0; // 0 = Room 1 (Hall), 1 = Transition/Hat, 2 = Great Hall
+    this.scrollProgress = 0; // 0: Name, 1: Sorting Hat, 2: Great Hall, 3: Divination, 4: Grand Staircase
     this.targetScroll = 0;
-    this.maxScroll = 2.0;
+    this.maxScroll = 4.0;
 
     this.isLocked = false;
     this.touchStartY = 0;
 
     // Room Camera Waypoints
-    // Room 0: Name Hall (0, 0, 7.5) -> (0, 0, 0)
-    // Room 1: Sorting Hat Room (0, 0, -28) -> (0, 0.4, -35)
-    // Room 2: The Great Hall (0, 2.8, -75) -> (0, 2.5, -95)
-  this.waypoints = [
+this.waypoints = [
       // Room 0: Name Hall
       { cam: new THREE.Vector3(0, 0, 7.5), look: new THREE.Vector3(0, 0, 0) },
-      // Room 1: Sorting Hat Room (Camera sits right in front of the hat at Z = -28)
+      // Room 1: Sorting Hat Room
       { cam: new THREE.Vector3(0, 0.35, -28.0), look: new THREE.Vector3(0, 0.45, -32.0) },
-      // Room 2: The Great Hall (Camera enters grand hall at Z = -95, looks to -125)
-      { cam: new THREE.Vector3(0, 2.4, -98.0), look: new THREE.Vector3(0, 3.2, -145.0) }
-
+      // Room 2: The Great Hall (center aisle)
+      { cam: new THREE.Vector3(0, 2.4, -85.0), look: new THREE.Vector3(0, 3.0, -115.0) },
+      // Room 3: Divination Tower (Camera sits eye-level right in front of the 3 crystal orbs)
+      { cam: new THREE.Vector3(0, 1.8, -135.0), look: new THREE.Vector3(0, 1.6, -140.0) },
+      // Room 4: Grand Staircase Timeline (Centered directly facing the milestone landings)
+      { cam: new THREE.Vector3(0, 4.0, -172.0), look: new THREE.Vector3(0, 5.0, -188.0) }
     ];
 
     this.onRoomChangeCallbacks = [];
@@ -34,7 +34,7 @@ export class ScrollManager {
   initEvents() {
     window.addEventListener('wheel', (e) => {
       if (this.isLocked) return;
-      const delta = e.deltaY * 0.0012;
+      const delta = e.deltaY * 0.001;
       this.targetScroll = THREE.MathUtils.clamp(this.targetScroll + delta, 0, this.maxScroll);
     }, { passive: true });
 
@@ -46,7 +46,7 @@ export class ScrollManager {
     window.addEventListener('touchmove', (e) => {
       if (this.isLocked) return;
       const touchY = e.touches[0].clientY;
-      const delta = (this.touchStartY - touchY) * 0.003;
+      const delta = (this.touchStartY - touchY) * 0.0028;
       this.touchStartY = touchY;
       this.targetScroll = THREE.MathUtils.clamp(this.targetScroll + delta, 0, this.maxScroll);
     }, { passive: true });
@@ -79,33 +79,38 @@ export class ScrollManager {
   }
 
   update(mouseParallax) {
-    // Smooth scroll dampening
     this.scrollProgress += (this.targetScroll - this.scrollProgress) * 0.06;
 
     const p = this.scrollProgress;
-    let baseCamPos = new THREE.Vector3();
-    let baseLookPos = new THREE.Vector3();
+    const baseCamPos = new THREE.Vector3();
+    const baseLookPos = new THREE.Vector3();
 
-    if (p <= 1.0) {
-      // Lerp between Room 1 and Room 2
-      const t = p;
-      // Slight swirl wave flight curve during flight
-      const swirlX = Math.sin(t * Math.PI) * 2.2;
-      const swirlY = Math.cos(t * Math.PI) * 1.1;
+    const segIndex = Math.min(Math.floor(p), this.waypoints.length - 2);
+    const segT = p - segIndex;
 
-      baseCamPos.lerpVectors(this.waypoints[0].cam, this.waypoints[1].cam, t);
-      baseCamPos.x += swirlX;
-      baseCamPos.y += swirlY;
+    const wpA = this.waypoints[segIndex];
+    const wpB = this.waypoints[segIndex + 1];
 
-      baseLookPos.lerpVectors(this.waypoints[0].look, this.waypoints[1].look, t);
+    if (segIndex === 2) {
+      // Transition 2 -> 3: Spiral Stair Flight up through smoke
+      const spiralAngle = segT * Math.PI * 3.5;
+      const radius = 3.2 * (1.0 - segT * 0.4);
+      baseCamPos.lerpVectors(wpA.cam, wpB.cam, segT);
+      baseCamPos.x += Math.cos(spiralAngle) * radius;
+      baseCamPos.y += Math.sin(segT * Math.PI) * 1.5;
+
+      baseLookPos.lerpVectors(wpA.look, wpB.look, segT);
+    } else if (segIndex === 3) {
+      // Transition 3 -> 4: Float down through floor hole into Stair Hall
+      baseCamPos.lerpVectors(wpA.cam, wpB.cam, segT);
+      baseCamPos.y -= Math.sin(segT * Math.PI) * 2.8;
+      baseLookPos.lerpVectors(wpA.look, wpB.look, segT);
     } else {
-      // Lerp between Room 2 and Room 3
-      const t = p - 1.0;
-      baseCamPos.lerpVectors(this.waypoints[1].cam, this.waypoints[2].cam, t);
-      baseLookPos.lerpVectors(this.waypoints[1].look, this.waypoints[2].look, t);
+      // Standard room flights
+      baseCamPos.lerpVectors(wpA.cam, wpB.cam, segT);
+      baseLookPos.lerpVectors(wpA.look, wpB.look, segT);
     }
 
-    // Apply Parallax and update camera
     if (mouseParallax) {
       this.camera.position.x = baseCamPos.x + mouseParallax.x * 1.2;
       this.camera.position.y = baseCamPos.y + mouseParallax.y * 0.8;
@@ -116,7 +121,6 @@ export class ScrollManager {
 
     this.camera.lookAt(baseLookPos);
 
-    // Track room transitions for UI triggers
     const activeIndex = Math.round(this.scrollProgress);
     if (activeIndex !== this.currentRoomIndex) {
       this.currentRoomIndex = activeIndex;

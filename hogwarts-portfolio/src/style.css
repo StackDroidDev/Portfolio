@@ -564,3 +564,225 @@ body, html {
     display: none;
   }
 }
+
+
+/* =========================================
+   PART 3: DIVINATION & GRAND STAIRCASE STYLES
+   ========================================= */
+
+/* Divination UI Overlay */
+.divination-ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 24px;
+  transition: opacity 0.5s ease;
+}
+
+.divination-ui.hidden {
+  display: none !important;
+}
+
+.divination-header {
+  text-align: center;
+  max-width: 640px;
+  pointer-events: auto;
+}
+
+.divination-intro {
+  font-family: var(--font-cinzel);
+  font-size: clamp(17px, 2.5vw, 24px);
+  color: var(--candle-gold);
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(232, 176, 74, 0.4);
+  margin-bottom: 6px;
+}
+
+.divination-hint {
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: rgba(243, 233, 210, 0.6);
+  font-family: var(--font-lora);
+}
+
+/* Accessible Tab Buttons */
+.divination-tabs {
+  display: flex;
+  gap: 14px;
+  pointer-events: auto;
+  margin-bottom: 12px;
+}
+
+.orb-tab-btn {
+  background: rgba(14, 18, 38, 0.85);
+  border: 1px solid rgba(232, 176, 74, 0.35);
+  color: var(--parchment);
+  font-family: var(--font-cinzel);
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 10px 22px;
+  border-radius: 4px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.orb-tab-btn:hover,
+.orb-tab-btn.active {
+  background: var(--candle-gold);
+  color: #070b1a;
+  box-shadow: 0 0 20px rgba(232, 176, 74, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Active Crystal Story Card Modal */
+.crystal-story-modal {
+  position: absolute;
+  top: 50%;
+  right: 6%;
+  transform: translateY(-50%);
+  width: min(440px, 88vw);
+  background: rgba(13, 16, 33, 0.94);
+  border: 1px solid var(--candle-gold);
+  border-radius: 8px;
+  padding: 28px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.95), 0 0 25px rgba(163, 107, 240, 0.35);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.crystal-story-modal.hidden {
+  display: none !important;
+}
+
+.close-btn {
+  align-self: flex-start;
+  font-size: 11px;
+}
+
+.story-subtitle {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #a36bf0;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.story-title {
+  font-family: var(--font-cinzel);
+  font-size: 26px;
+  color: var(--parchment);
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.story-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.story-line {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #e5dcc7;
+  border-left: 2px solid var(--candle-gold);
+  padding-left: 12px;
+}
+
+.story-carousel-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(243, 233, 210, 0.15);
+  padding-top: 14px;
+  margin-top: 6px;
+}
+
+.icon-nav-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(232, 176, 74, 0.4);
+  color: var(--parchment);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.icon-nav-btn:hover {
+  background: var(--candle-gold);
+  color: #070b1a;
+}
+
+.story-counter {
+  font-family: var(--font-cinzel);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: rgba(243, 233, 210, 0.7);
+}
+
+/* =========================================
+   TIMELINE UI & SCREEN-READER ARCHITECTURE
+   ========================================= */
+.timeline-ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.timeline-ui.hidden {
+  display: none !important;
+}
+
+.timeline-title-card {
+  background: rgba(8, 12, 26, 0.85);
+  border: 1px solid rgba(232, 176, 74, 0.3);
+  padding: 14px 24px;
+  border-radius: 6px;
+  backdrop-filter: blur(8px);
+}
+
+.timeline-heading {
+  font-family: var(--font-cinzel);
+  font-size: clamp(20px, 3.2vw, 32px);
+  color: var(--candle-gold);
+  letter-spacing: 4px;
+}
+
+.timeline-subheading {
+  font-size: 12px;
+  color: rgba(243, 233, 210, 0.6);
+  letter-spacing: 1.5px;
+}
+
+/* Hidden from visual sight, fully indexable by SEO & Accessible to Screen Readers */
+.timeline-screen-reader-list {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
