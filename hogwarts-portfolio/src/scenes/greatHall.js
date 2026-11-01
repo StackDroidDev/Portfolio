@@ -227,79 +227,41 @@ const tableMat = new THREE.MeshStandardMaterial({
   }
 
   buildRealisticFloatingCandles(count) {
-    const waxMat = new THREE.MeshPhysicalMaterial({
+    // Shared lightweight emissive material (1 single draw call for all 220 candles)
+    const waxMat = new THREE.MeshStandardMaterial({
       color: 0xf5dfb3,
-      emissive: 0x6a3809,
-      emissiveIntensity: 0.4,
-      roughness: 0.35,
-      metalness: 0.05,
-      transmission: 0.2,
-      thickness: 0.7
+      emissive: 0xff9f22,
+      emissiveIntensity: 0.85,
+      roughness: 0.4
     });
 
-    const flameMat = new THREE.MeshBasicMaterial({ color: 0xfff6dc });
-    const haloMat = new THREE.MeshBasicMaterial({
-      color: 0xffa41c,
-      transparent: true,
-      opacity: 0.35,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
+    const candleGeo = new THREE.CylinderGeometry(0.06, 0.07, 1.0, 8);
+    this.candlesInstanced = new THREE.InstancedMesh(candleGeo, waxMat, count);
+    this.candlesInstanced.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+    const dummy = new THREE.Object3D();
+    this.candleData = [];
 
     for (let i = 0; i < count; i++) {
-      const group = new THREE.Group();
-      const height = 0.85 + Math.random() * 0.95;
-      const radius = 0.08 + Math.random() * 0.03;
-
-      // Candle wax cylinder
-      const body = new THREE.Mesh(
-        new THREE.CylinderGeometry(radius * 0.92, radius, height, 12),
-        waxMat
-      );
-      group.add(body);
-
-      // Melted rim
-      const rim = new THREE.Mesh(
-        new THREE.TorusGeometry(radius * 0.85, 0.02, 6, 12),
-        waxMat
-      );
-      rim.rotation.x = Math.PI / 2;
-      rim.position.y = height / 2;
-      group.add(rim);
-
-      // Teardrop flame
-      const flame = new THREE.Mesh(
-        new THREE.ConeGeometry(0.04, 0.18, 8),
-        flameMat
-      );
-      flame.position.y = height / 2 + 0.13;
-      group.add(flame);
-
-      // Golden halo glow
-      const halo = new THREE.Mesh(
-        new THREE.SphereGeometry(0.24, 10, 10),
-        haloMat
-      );
-      halo.position.y = height / 2 + 0.13;
-      group.add(halo);
-      this.flameHalos.push(halo);
-
-      // Placement clustered vertically over tables as in the movie
-      const x = (Math.random() - 0.5) * 20;
-      const y = 1.8 + Math.random() * 7.5;
+      const x = (Math.random() - 0.5) * 18;
+      const y = 2.0 + Math.random() * 7.0;
       const z = -38 + Math.random() * 72;
 
-      group.position.set(x, y, z);
-      group.userData = {
+      dummy.position.set(x, y, z);
+      dummy.updateMatrix();
+      this.candlesInstanced.setMatrixAt(i, dummy.matrix);
+
+      this.candleData.push({
         baseX: x,
         baseY: y,
-        speed: 0.8 + Math.random() * 1.4,
+        baseZ: z,
+        speed: 0.8 + Math.random() * 1.2,
         offset: Math.random() * Math.PI * 2
-      };
-
-      this.group.add(group);
-      this.candles.push(group);
+      });
     }
+
+    this.candlesInstanced.instanceMatrix.needsUpdate = true;
+    this.group.add(this.candlesInstanced);
   }
 
   buildAtmosphericParticles() {
@@ -365,22 +327,20 @@ const tableMat = new THREE.MeshStandardMaterial({
     if (ui) ui.classList.add('hidden');
   }
 
-  update(time, mouseParallax) {
-    const pX = mouseParallax ? mouseParallax.x * 0.4 : 0;
-    const pY = mouseParallax ? mouseParallax.y * 0.25 : 0;
+ update(time, mouseParallax) {
+    const pX = mouseParallax ? mouseParallax.x * 0.3 : 0;
+    const pY = mouseParallax ? mouseParallax.y * 0.2 : 0;
 
-    // Organic candle bobbing and parallax
-    for (let i = 0; i < this.candles.length; i++) {
-      const c = this.candles[i];
-      c.position.y = c.userData.baseY + Math.sin(time * c.userData.speed + c.userData.offset) * 0.14 + pY;
-      c.position.x = c.userData.baseX + pX;
-    }
-
-    // Gentle shimmer of flame halos
-    for (let i = 0; i < this.flameHalos.length; i++) {
-      const h = this.flameHalos[i];
-      const scale = 1.0 + Math.sin(time * 6.0 + i) * 0.12;
-      h.scale.set(scale, scale, scale);
+    if (this.candlesInstanced) {
+      const dummy = new THREE.Object3D();
+      for (let i = 0; i < this.candleData.length; i++) {
+        const d = this.candleData[i];
+        const floatY = d.baseY + Math.sin(time * d.speed + d.offset) * 0.12 + pY;
+        dummy.position.set(d.baseX + pX, floatY, d.baseZ);
+        dummy.updateMatrix();
+        this.candlesInstanced.setMatrixAt(i, dummy.matrix);
+      }
+      this.candlesInstanced.instanceMatrix.needsUpdate = true;
     }
 
     if (this.themeParticles) {

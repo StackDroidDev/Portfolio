@@ -8,6 +8,10 @@ import { ScrollManager } from './systems/scrollManager.js';
 import { SortingHatScene } from './scenes/sortingHat.js';
 import { GreatHallScene } from './scenes/greatHall.js';
 
+// --- PART 3 IMPORTS ---
+import { AboutScene } from './scenes/about.js';
+import { TimelineScene } from './scenes/timeline.js';
+
 class App {
   constructor() {
     this.container = document.getElementById('webgl-container');
@@ -23,14 +27,13 @@ class App {
 
   initCore() {
     this.scene = new THREE.Scene();
-    // Lower density allows the grand hall architecture to stay visible across distances
-this.scene.fog = new THREE.FogExp2(0x090d1f, 0.012);
+    this.scene.fog = new THREE.FogExp2(0x090d1f, 0.012);
 
     this.camera = new THREE.PerspectiveCamera(
       45,
       window.innerWidth / window.innerHeight,
       0.1,
-      150
+      280
     );
     this.camera.position.set(0, 0, 9.5);
     this.camera.lookAt(0, 0, 0);
@@ -41,7 +44,11 @@ this.scene.fog = new THREE.FogExp2(0x090d1f, 0.012);
       powerPreference: 'high-performance'
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2.0));
+    // Clamp pixel ratio to 1.25 maximum (dramatically lowers fill-rate load without visible quality loss)
+this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+// Turn off automatic shadow re-computation every frame
+this.renderer.shadowMap.autoUpdate = false;
+this.renderer.shadowMap.needsUpdate = true;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.25;
     this.renderer.shadowMap.enabled = !isMobile;
@@ -64,30 +71,49 @@ this.scene.fog = new THREE.FogExp2(0x090d1f, 0.012);
     this.sortingHatScene = new SortingHatScene(this.scene, this.houseTheme, this.scrollManager);
     this.greatHallScene = new GreatHallScene(this.scene, this.houseTheme);
 
+    // Part 3
+    this.aboutScene = new AboutScene(this.scene, this.camera, this.houseTheme);
+    this.timelineScene = new TimelineScene(this.scene, this.camera, this.houseTheme);
+
+    // Room visibility & UI manager along scroll progress
     this.scrollManager.onRoomChange((roomIndex) => {
       const p1Role = document.getElementById('role-subtitle');
       const p1Hint = document.getElementById('scroll-hint');
 
       if (roomIndex === 0) {
-        // In Room 1 (Name Reveal)
         if (this.hallScene.solidTextGroup) this.hallScene.solidTextGroup.material.opacity = 1;
         if (p1Role) p1Role.style.display = 'block';
         if (p1Hint) p1Hint.style.display = 'flex';
         document.getElementById('sorting-hat-ui')?.classList.add('hidden');
         this.greatHallScene.onLeaveRoom();
+        this.aboutScene.onLeaveRoom();
+        this.timelineScene.onLeaveRoom();
       } else if (roomIndex === 1) {
-        // In Room 2 (Sorting Hat)
         if (this.hallScene.solidTextGroup) this.hallScene.solidTextGroup.material.opacity = 0;
         if (p1Role) p1Role.style.display = 'none';
         if (p1Hint) p1Hint.style.display = 'none';
         this.sortingHatScene.onEnterRoom();
         this.greatHallScene.onLeaveRoom();
+        this.aboutScene.onLeaveRoom();
+        this.timelineScene.onLeaveRoom();
       } else if (roomIndex === 2) {
-        // In Room 3 (Great Hall)
         if (this.hallScene.solidTextGroup) this.hallScene.solidTextGroup.material.opacity = 0;
         document.getElementById('sorting-hat-ui')?.classList.add('hidden');
         this.greatHallScene.onEnterRoom();
+        this.aboutScene.onLeaveRoom();
+        this.timelineScene.onLeaveRoom();
+      } else if (roomIndex === 3) {
+        if (this.hallScene.solidTextGroup) this.hallScene.solidTextGroup.material.opacity = 0;
+        this.greatHallScene.onLeaveRoom();
+        this.aboutScene.onEnterRoom();
+        this.timelineScene.onLeaveRoom();
+      } else if (roomIndex === 4) {
+        if (this.hallScene.solidTextGroup) this.hallScene.solidTextGroup.material.opacity = 0;
+        this.greatHallScene.onLeaveRoom();
+        this.aboutScene.onLeaveRoom();  // <-- Ensures Divination UI closes
+        this.timelineScene.onEnterRoom();
       }
+      
     });
   }
 
@@ -155,12 +181,17 @@ this.scene.fog = new THREE.FogExp2(0x090d1f, 0.012);
     this.lighting.update(time);
     this.hallScene.update(delta, time, this.mouse);
 
+    // Part 2 Updates
     this.scrollManager.update(this.mouse);
     this.sortingHatScene.update(time);
     this.greatHallScene.update(time, this.mouse);
+
+    // Part 3 Updates
+    this.aboutScene.update(time);
+    this.timelineScene.update(time, this.mouse);
 
     this.post.composer.render();
   }
 }
 
-new App(); 
+new App();
