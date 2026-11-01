@@ -262,3 +262,260 @@ body, html {
   0%, 100% { transform: translateY(0); opacity: 0.3; }
   50% { transform: translateY(8px); opacity: 1; }
 }
+
+/* --- PART 2 STYLES: SORTING HAT, CRESTS & GREAT HALL --- */
+
+/* Sorting Hat Speech Bubble */
+.sorting-ui-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 70px;
+  transition: opacity 0.5s ease;
+}
+
+.sorting-ui-container.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.hat-speech-bubble {
+  background: rgba(7, 11, 26, 0.85);
+  border: 1px solid var(--candle-gold);
+  border-radius: 8px;
+  padding: 16px 28px;
+  max-width: min(580px, 86vw);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(232, 176, 74, 0.25);
+  backdrop-filter: blur(8px);
+  margin-bottom: 24px;
+  pointer-events: auto;
+  text-align: center;
+}
+
+.speech-text {
+  font-family: var(--font-cinzel);
+  font-size: clamp(15px, 2.2vw, 19px);
+  letter-spacing: 2px;
+  color: var(--parchment);
+  line-height: 1.5;
+  min-height: 28px;
+}
+
+.sorting-actions-row {
+  display: flex;
+  gap: 16px;
+  pointer-events: auto;
+}
+
+/* Quiz Card */
+.sorting-quiz-card {
+  background: rgba(9, 14, 32, 0.9);
+  border: 1px solid var(--candle-gold);
+  border-radius: 8px;
+  padding: 24px 32px;
+  width: min(520px, 90vw);
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quiz-question {
+  font-family: var(--font-cinzel);
+  font-size: 17px;
+  color: var(--candle-gold);
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quiz-opt-btn {
+  text-align: left;
+  padding: 10px 18px;
+  font-size: 13px;
+  text-transform: none;
+  font-family: var(--font-lora);
+}
+
+/* 4 House Crests Grid */
+.crests-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  width: min(720px, 94vw);
+  pointer-events: auto;
+}
+
+@media (max-width: 680px) {
+  .crests-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.crest-card {
+  background: rgba(11, 16, 36, 0.78);
+  border: 1px solid rgba(243, 233, 210, 0.2);
+  border-radius: 6px;
+  padding: 16px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(6px);
+}
+
+.crest-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--crest-accent);
+  box-shadow: 0 0 20px var(--crest-accent);
+}
+
+.crest-symbol {
+  font-family: var(--font-cinzel);
+  font-size: 24px;
+  color: var(--crest-accent);
+}
+
+.crest-name {
+  font-family: var(--font-cinzel);
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  color: var(--parchment);
+  margin: 6px 0 2px 0;
+}
+
+.crest-sub {
+  font-size: 11px;
+  color: rgba(243, 233, 210, 0.6);
+}
+
+/* Sorting Result Banner */
+.sorting-result-banner {
+  text-align: center;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.result-badge {
+  font-family: var(--font-cinzel);
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: rgba(243, 233, 210, 0.7);
+  text-transform: uppercase;
+}
+
+.result-house-title {
+  font-family: var(--font-cinzel);
+  font-size: clamp(32px, 5vw, 56px);
+  letter-spacing: 6px;
+  text-shadow: 0 0 25px currentColor;
+}
+
+/* Change House Tag & Widget */
+.change-house-widget {
+  position: absolute;
+  top: 30px;
+  right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.house-tag {
+  font-family: var(--font-cinzel);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--candle-gold);
+}
+
+.sorting-skip {
+  bottom: 20px;
+}
+
+/* Screen Flash overlay for sorting ceremony */
+.sorting-screen-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0.7;
+  animation: flash-fade 0.7s forwards ease-out;
+}
+
+@keyframes flash-fade {
+  0% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+/* Great Hall Intro Banner */
+.great-hall-ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 24px;
+  transition: opacity 0.8s ease;
+}
+
+.great-hall-ui.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.great-hall-banner {
+  max-width: 720px;
+}
+
+.hall-title {
+  font-family: var(--font-cinzel);
+  font-size: clamp(28px, 4.5vw, 48px);
+  color: var(--candle-gold);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  text-shadow: 0 0 25px rgba(232, 176, 74, 0.4);
+}
+
+.hall-statement {
+  font-family: var(--font-lora);
+  font-style: italic;
+  font-size: clamp(16px, 2.4vw, 22px);
+  color: var(--parchment);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.hall-subhint {
+  font-family: var(--font-cinzel);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: rgba(243, 233, 210, 0.5);
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sorting-screen-flash {
+    display: none;
+  }
+}

@@ -3,6 +3,10 @@ import { WandCursor } from './systems/cursor.js';
 import { HallLighting } from './systems/lighting.js';
 import { createPostProcessing } from './systems/postprocessing.js';
 import { Part1Hall } from './scenes/part1-hall.js';
+import { HouseThemeManager } from './systems/houseTheme.js';
+import { ScrollManager } from './systems/scrollManager.js';
+import { SortingHatScene } from './scenes/sortingHat.js';
+import { GreatHallScene } from './scenes/greatHall.js';
 
 class App {
   constructor() {
@@ -10,9 +14,9 @@ class App {
     this.mouse = { x: 0, y: 0 };
     this.clock = new THREE.Clock();
 
+    this.initLoader();
     this.initCore();
     this.initSystems();
-    this.initLoader();
     this.bindEvents();
     this.animate();
   }
@@ -25,7 +29,7 @@ class App {
       45,
       window.innerWidth / window.innerHeight,
       0.1,
-      100
+      150
     );
     this.camera.position.set(0, 0, 9.5);
     this.camera.lookAt(0, 0, 0);
@@ -49,7 +53,26 @@ class App {
     this.cursor = new WandCursor();
     this.lighting = new HallLighting(this.scene);
     this.post = createPostProcessing(this.renderer, this.scene, this.camera);
+
+    // Part 1
     this.hallScene = new Part1Hall(this.scene, this.camera, this.lighting);
+
+    // Part 2
+    this.houseTheme = new HouseThemeManager();
+    this.scrollManager = new ScrollManager(this.camera);
+    this.sortingHatScene = new SortingHatScene(this.scene, this.houseTheme, this.scrollManager);
+    this.greatHallScene = new GreatHallScene(this.scene, this.houseTheme);
+
+    this.scrollManager.onRoomChange((roomIndex) => {
+      if (roomIndex === 1) {
+        this.sortingHatScene.onEnterRoom();
+        this.greatHallScene.onLeaveRoom();
+      } else if (roomIndex === 2) {
+        this.greatHallScene.onEnterRoom();
+      } else {
+        this.greatHallScene.onLeaveRoom();
+      }
+    });
   }
 
   initLoader() {
@@ -59,6 +82,8 @@ class App {
     const actions = document.getElementById('loader-actions');
     const loader = document.getElementById('loader');
 
+    if (!bar || !text || !loader) return;
+
     const interval = setInterval(() => {
       progress += Math.floor(Math.random() * 8) + 3;
       if (progress >= 100) {
@@ -66,12 +91,12 @@ class App {
         clearInterval(interval);
         bar.style.width = '100%';
         text.textContent = '100%';
-        actions.classList.remove('hidden');
+        if (actions) actions.classList.remove('hidden');
       } else {
         bar.style.width = `${progress}%`;
         text.textContent = `${progress}%`;
       }
-    }, 40);
+    }, 35);
 
     const dismissLoader = () => {
       loader.classList.add('fade-out');
@@ -96,6 +121,7 @@ class App {
     });
 
     document.getElementById('btn-replay')?.addEventListener('click', () => {
+      this.scrollManager.scrollToRoom(0, 1.0);
       this.hallScene.startSequence();
     });
 
@@ -112,8 +138,13 @@ class App {
 
     this.lighting.update(time);
     this.hallScene.update(delta, time, this.mouse);
+
+    this.scrollManager.update(this.mouse);
+    this.sortingHatScene.update(time);
+    this.greatHallScene.update(time, this.mouse);
+
     this.post.composer.render();
   }
 }
 
-new App();
+new App(); q

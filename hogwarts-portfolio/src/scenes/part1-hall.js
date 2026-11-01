@@ -176,7 +176,7 @@ export class Part1Hall {
     const wandMat = new THREE.MeshStandardMaterial({
       color: 0x24140b,
       roughness: 0.6,
-      metalness: 0.1
+      metalness: 0.4
     });
 
     const shaft = new THREE.Mesh(
