@@ -79,52 +79,105 @@ export class Part1Hall {
   }
 
   buildCandles(count) {
-    const waxMat = new THREE.MeshStandardMaterial({
-      color: 0xe3dbbe,
-      roughness: 0.45,
-      metalness: 0.05
+    // 1. Organic Warm Beeswax with subsurface feel
+    const waxMat = new THREE.MeshPhysicalMaterial({
+      color: 0xf5dfb3,
+      emissive: 0x5a3410,
+      emissiveIntensity: 0.35,
+      roughness: 0.38,
+      metalness: 0.05,
+      transmission: 0.25,
+      thickness: 0.8
     });
 
-    const flameMat = new THREE.MeshBasicMaterial({ color: 0xffedd0 });
+    const dripMat = new THREE.MeshStandardMaterial({
+      color: 0xfff0cc,
+      roughness: 0.3
+    });
+
+    const flameMat = new THREE.MeshBasicMaterial({
+      color: 0xfff3d6
+    });
+
+    const haloMat = new THREE.MeshBasicMaterial({
+      color: 0xff9911,
+      transparent: true,
+      opacity: 0.38,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
 
     for (let i = 0; i < count; i++) {
       const group = new THREE.Group();
-      const height = 0.8 + Math.random() * 0.7;
-      const radius = 0.08 + Math.random() * 0.03;
+      const height = 0.9 + Math.random() * 0.9;
+      const radius = 0.09 + Math.random() * 0.035;
 
+      // Candle body
       const body = new THREE.Mesh(
-        new THREE.CylinderGeometry(radius * 0.95, radius, height, 16),
+        new THREE.CylinderGeometry(radius * 0.9, radius, height, 16),
         waxMat
       );
+      body.castShadow = true;
       group.add(body);
 
+      // Melted cup rim
       const rim = new THREE.Mesh(
-        new THREE.TorusGeometry(radius * 0.88, 0.02, 8, 16),
+        new THREE.TorusGeometry(radius * 0.82, 0.024, 8, 16),
         waxMat
       );
       rim.rotation.x = Math.PI / 2;
       rim.position.y = height / 2;
       group.add(rim);
 
+      // Organic wax drips down the sides
+      const dripCount = 2 + Math.floor(Math.random() * 3);
+      for (let d = 0; d < dripCount; d++) {
+        const dAngle = Math.random() * Math.PI * 2;
+        const dLen = 0.2 + Math.random() * 0.45;
+        const drip = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.012, 0.004, dLen, 8),
+          dripMat
+        );
+        drip.position.set(
+          Math.cos(dAngle) * (radius * 0.92),
+          height / 2 - dLen / 2,
+          Math.sin(dAngle) * (radius * 0.92)
+        );
+        group.add(drip);
+      }
+
+      // Curved burnt wick
       const wick = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.008, 0.008, 0.08),
-        new THREE.MeshBasicMaterial({ color: 0x1a1a1a })
+        new THREE.CylinderGeometry(0.006, 0.007, 0.09, 6),
+        new THREE.MeshBasicMaterial({ color: 0x14100c })
       );
-      wick.position.y = height / 2 + 0.04;
+      wick.position.set(0.008, height / 2 + 0.045, 0);
+      wick.rotation.z = -0.15;
       group.add(wick);
 
+      // Teardrop Flame Mesh
       const flame = new THREE.Mesh(
-        new THREE.ConeGeometry(0.045, 0.16, 8),
+        new THREE.ConeGeometry(0.042, 0.18, 10),
         flameMat
       );
-      flame.position.y = height / 2 + 0.13;
+      flame.position.y = height / 2 + 0.14;
       group.add(flame);
 
-      const pLight = new THREE.PointLight(0xe8b04a, 0.9, 5, 2);
+      // Warm radial flame glow halo
+      const halo = new THREE.Mesh(
+        new THREE.SphereGeometry(0.24, 12, 12),
+        haloMat
+      );
+      halo.position.y = height / 2 + 0.14;
+      group.add(halo);
+
+      // Point Light
+      const pLight = new THREE.PointLight(0xffa834, 1.4, 6.0, 1.8);
       pLight.position.y = height / 2 + 0.16;
       group.add(pLight);
-      this.lighting.registerCandleLight(pLight, 0.9);
+      this.lighting.registerCandleLight(pLight, 1.4);
 
+      // Placement in Hall 1
       let x = (Math.random() - 0.5) * 14;
       let y = -0.5 + Math.random() * 3.5;
       let z = -8 + Math.random() * 14;

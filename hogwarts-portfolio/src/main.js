@@ -23,7 +23,8 @@ class App {
 
   initCore() {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x070b1a, 0.035);
+    // Lower density allows the grand hall architecture to stay visible across distances
+this.scene.fog = new THREE.FogExp2(0x090d1f, 0.012);
 
     this.camera = new THREE.PerspectiveCamera(
       45,
